@@ -144,7 +144,7 @@ import this module, no code changes are needed.
 
 .. code:: nim
 
-  import utils/incdec
+  import jibby/utils/incdec
 
 Printing numbers
 ================
@@ -166,7 +166,7 @@ implementation, support for both of which are available in the `itoa`_ module:
 
 .. code:: nim
 
-  import utils/itoa
+  import jibby/utils/itoa
 
 This module will also automatically override the default `$`_ operator for
 integers, so you don't really need to do anything else there.
