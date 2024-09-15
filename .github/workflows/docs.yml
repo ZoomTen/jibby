@@ -1,0 +1,32 @@
+name: Build docs
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Setup Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: '2.0.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Make html docs
+        run: nimble docs
+      
+      - name: Publish docs
+        if: |
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          build_dir: htmldocs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
