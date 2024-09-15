@@ -4,11 +4,18 @@ on:
   push:
     branches: ["master"]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   deploy:
     name: Deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    environment: github-pages
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -22,11 +29,14 @@ jobs:
       - name: Make html docs
         run: nimble docs
       
-      - name: Publish docs
-        if: |
-          github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: crazy-max/ghaction-github-pages@v4
+      - name: Setup GH pages
+        uses: actions/configure-pages@v5
+      
+      - name: Prepare docs artifact
+        uses: github/upload-pages-artifact@v3
         with:
-          build_dir: htmldocs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: htmldocs
+      
+      - name: Deploy to GH Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
