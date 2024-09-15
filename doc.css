@@ -102,7 +102,7 @@ body {
 
 main#page-container {
     margin: auto;
-    max-width: 64em;
+    max-width: 68em;
 }
 
 a {
@@ -130,7 +130,7 @@ div.is-split {
 
 nav#main-nav {
     border-radius: 5px;
-    width: 12.5rem;
+    width: 15rem;
     height: max-content;
     padding: .5em;
     border: 3px outset #666;
