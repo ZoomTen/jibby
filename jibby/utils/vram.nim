@@ -1,6 +1,23 @@
 ## VRAM manipulation functions.
 ## 
 ## .. importdoc:: print.nim
+runnableExamples "--compileOnly -r:off":
+  import jibby/utils/codegen
+
+  # {.compile: "gfx.asm".}
+  # Assuming these graphics live in gfx.asm, whereby
+  # they are defined like:
+  # _titleScreenGfx: .incbin "title.2bpp"
+  # _fontGfx: .incbin "font.2bpp"
+  var
+    titleScreenGfx {.importc, asmdefined, noinit.}: uint8
+    fontGfx {.importc, asmdefined, noinit.}: uint8
+
+  turnOffScreen()
+  clearVram()
+  cast[pointer](Tiles1).copyMem(titleScreenGfx.addr, 0x30.tiles)
+  cast[pointer](Tiles2.offset(' '.ord)).copyMem(fontGfx.addr, 0x60.tiles)
+  turnOnScreen()
 
 import ./interrupts
 import ./codegen

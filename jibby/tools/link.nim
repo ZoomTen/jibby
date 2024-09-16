@@ -1,9 +1,19 @@
-## Mimics icc for the linking and everything
-## Calls sdldgb directly.
-##
-## Not only is this basically a hack off Nim's default linker
-## assumptions, but putting this inside config.nims will make it
-## run *as* Nim is compiling, which isn't what I want
+## ============
+## Link wrapper
+## ============
+## 
+## See the `compile <compile.html>`_ module for explanation on how this
+## tool is needed to replace the C compiler, and instructions on how
+## to compile this tool with your project.
+## 
+## What
+## ----
+## 
+## 1. Mimics GBDK's `lcc` front-end to link compiled object files together
+##    into a finished ROM.
+## 2. Natively implements `ihx2bin` and `noi2sym`, which were separate
+##    programs in the GBDK distribution.
+## 3. Fixes the checksum of the finished ROM. (Needs more work…)
 
 import os
 import ./helpers
@@ -65,7 +75,6 @@ proc makeBin(ihxFileName: string): seq[byte] =
       someHighAddr > highestAddr
     ):
       highestAddr = someHighAddr
-
   var convertedBinary = newSeq[byte](highestAddr)
   for record in i.records:
     for byteIndex in 0 ..< record.data.len():
@@ -78,25 +87,21 @@ proc ihx2bin(ihxFileName, binFileName, gameName: string): void =
     romImage = ihxFileName.makeBin()
     st = binFileName.openFileStream(fmWrite)
   romImage.setLen(ceilDiv(romImage.len, 0x4000) * 0x4000)
-
   # write the game title in the header
   if gameName.len > 16:
     raise
       newException(CatchableError, "game name must be <= 16 characters")
-
   # I want to use romImage[a..b] = string :(
   for i in 0 ..< 0x10:
     if i > (gameName.len - 1):
       break
     romImage[0x134 + i] = byte(gameName[i])
-
   # fix both checksums
   # header TODO: fix this
   var headerCheck = 0'u8
   for i in 0x134 .. 0x14c:
     headerCheck += romImage[i]
   romImage[0x14d] = headerCheck
-
   # global
   var globalCheck = 0'u16
   for i in 0 ..< romImage.len:
@@ -105,7 +110,6 @@ proc ihx2bin(ihxFileName, binFileName, gameName: string): void =
     globalCheck += uint16(romImage[i])
   romImage[0x14e] = uint8((globalCheck shr 8) and 0xff)
   romImage[0x14f] = uint8(globalCheck and 0xff)
-
   # write the actual file
   st.writeData(romImage[0].addr, romImage.len)
 
@@ -138,39 +142,32 @@ proc noi2sym(noiFileName, symFileName: string): void =
 when isMainModule:
   let gbdkRoot = getGbdkRoot()
   var inputs = commandLineParams().join(" ").paramsToSdldInput()
-
   let (outfDir, outfName, outfExt) = inputs.outputFile.splitFile()
-
   # first link everything into an .ihx file
   # going with whatever LCC has as the default
   execWithEcho(
     (
       @[
         gbdkRoot / "bin" / "sdldgb",
-
         # "-n", # silent
         "-i", # output to IHX
         "-m", # generate map output
         "-j", # generate NoICE debug file
         "-u", # update all the listing files to reflect actual locations
-
         # define globals
         "-g STACK=0x" & stackStart.toHex(4),
-
         # define base addrs
         "-b _DATA=0x" & dataStart.toHex(4),
         "-b _CODE=0x" & codeStart.toHex(4),
         "-b _SPRITES=0x" & virtualSpritesStart.toHex(4),
         "-b _HRAM=0xFF80", # HRAM always starts here
         (
-
           # add libraries
           when useGbdk:
             "-k " & gbdkRoot / "lib" / "sm83" & " -l sm83.lib"
           else:
             ""
         ),
-
         # output to:
         outfDir / outfName & ".ihx",
       ] &

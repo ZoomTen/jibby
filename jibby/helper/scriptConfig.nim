@@ -4,9 +4,16 @@ import ./jibbyConfig
 
 # Apparently a "portable" way to get something from this package.
 const pkgRoot* = currentSourcePath() / ".." / ".."
+  ## The root of the `jibby` package. This will resolve into the
+  ## actual path of *your* `jibby` package at compile-time, so ignore
+  ## what the docs say here.
 
 # From ./jibbyConfig
 proc makeArgs*(): seq[string] =
+  ## This is a helper to pass Chronicles-styled command-line param
+  ## configurations to the selfExec compiler that wants to compile the
+  ## `compile <../tools/compile.html>`_ and `link <../tools/link.html>`_
+  ## tools.
   var extraArgs: seq[string] = @[]
   extraArgs.add "-d:" & "gbAllocType:" & $allocType
   extraArgs.add "-d:" & "gbRomTitle:" & romTitle
@@ -99,3 +106,21 @@ when defined(nimscript):
     patchFile(
       "stdlib", "memory", (pkgRoot / "utils" / "nimMemory").absolutePath()
     )
+elif defined(nimdoc):
+  proc precompileTools*() =
+    ## Call this proc in your `config.nims` to precompile the needed
+    ## `compile <../tools/compile.html>`_ and `link <../tools/link.html>`_
+    ## wrappers. These tools will be placed in `.tools/` of your project
+    ## directory.
+    discard
+  proc setupToolchain*() =
+    ## Call this proc to configure the Nim parameters for compiling Game Boy
+    ## programs.
+    discard
+  proc patchCompiler*() =
+    ## Call this proc to override Nim's memory management utilities to
+    ## better optimize it for the Game Boy environment.
+    ## 
+    ## Specifically, it patches `memory.nim` from the system module to
+    ## Jibby's own version located in `pkgRoot`_ `/utils/nimMemory.nim`.
+    discard

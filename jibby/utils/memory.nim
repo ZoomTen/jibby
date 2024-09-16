@@ -46,10 +46,11 @@ template setMem*(start: pointer, value: static byte, length: Natural) =
 
 template setMem*(start: pointer, value: byte, length: Natural) =
   ## Fills a section of memory with a single byte.
-  ## 
-  ## ```nim
-  ## cast[pointer](0xc000).setMem(0, 0xd000 - 0xc000)
-  ## ```
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/memory
+
+    # clear WRAM0
+    cast[pointer](0xc000).setMem(0, 0xd000 - 0xc000)
   setMemImpl(start, value, length)
 
 when defined(nimdoc):

@@ -1,3 +1,24 @@
+## ===================
+## Jibby configuration
+## ===================
+## 
+## Inspired by `Chronicles <https://github.com/status-im/nim-chronicles>`_,
+## Jibby allows you to configure various ROM setttings at compile-time
+## through command line parameters.
+## 
+## The available parameters are as listed in the `Consts` section below,
+## but with "gb" prepended to it.
+## 
+## Example:
+## 
+## ```sh
+## -d:gbAllocType=FreeList
+## -d:gbRomTitle='HELLO WORLD'
+## ```
+## 
+## Some of these configurations require the `wrapper tools <scriptConfig.html>`_
+## to be rebuilt, so you may want to delete the `.tools/` subdirectory beforehand.
+
 # Borrrowed from `chronicles`
 
 import std/strutils
