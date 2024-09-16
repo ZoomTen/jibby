@@ -30,18 +30,18 @@ template turnOnInterrupts*() =
 
 template enableInterrupts*(which: InterruptFlags) =
   ## Enable a set of Game Boy interrupts.
-  ##
-  ## ```nim
-  ## enableInterrupts({IntVblank, IntLcd})
-  ## ```
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/interrupts
+
+    enableInterrupts({IntVblank, IntLcd})
   InterruptEnable[] = InterruptEnable[] + which
 
 template disableInterrupts*(which: InterruptFlags) =
   ## Disable a set of Game Boy interrupts.
-  ##
-  ## ```nim
-  ## disableInterrupts({IntVblank})
-  ## ```
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/interrupts
+
+    disableInterrupts({IntVblank})
   InterruptEnable[] = InterruptEnable[] - which
 
 template waitInterrupt*(): void =

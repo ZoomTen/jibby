@@ -111,10 +111,17 @@ var vblankAcked {.importc, hramByte, noinit.}: bool
 
 template enableLcdcFeatures*(i: LcdcFlags): untyped =
   ## Enable rLCDC flags.
-  ## 
-  ## ```nim
-  ## enableLcdcFeatures({BgEnable, UseWinMap1})
-  ## ```
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/vram
+
+    enableLcdcFeatures(
+      {
+        BgEnable, # Display the background
+        UseWinMap1, # Set window to 0x9C00
+        LcdOn, # Turn on the screen
+      }
+    )
+
   LcdControl[] = LcdControl[] + i
 
 template disableLcdcFeatures*(i: LcdcFlags): untyped =
@@ -122,9 +129,17 @@ template disableLcdcFeatures*(i: LcdcFlags): untyped =
   ## this will error out and you would be advised to use `turnOffScreen()`_
   ## instead.
   ## 
-  ## ```nim
-  ## disableLcdcFeatures({WinEnable})
-  ## ```
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/vram
+
+    disableLcdcFeatures({WinEnable})
+
+    when false:
+      # compiler error!
+      disableLcdcFeatures({LcdOn})
+    else:
+      turnOffScreen()
+
   when LcdOn in i:
     {.
       error:
@@ -139,6 +154,22 @@ template turnOnScreen*(): untyped =
 proc turnOffScreen*(): void =
   ## Safely turns off the LCD. According to the Pan Docs, the screen
   ## cannot be turned off unless rLY hits V-blank.
+  runnableExamples "--compileOnly -r:off":
+    from jibby/utils/codegen import asmDefined
+    import jibby/utils/vram
+
+    var hugeGfx {.importc, asmDefined, noinit.}: array[0x100.tiles, byte]
+
+    # Copying large graphics. To make this a simple memory-copy operation,
+    # the screen needs to be turned off beforehand.
+    turnOffScreen()
+    copyMem(
+      cast[pointer](Tiles0), # Since the screen is turned off
+      hugeGfx.addr,
+      0x100.tiles,
+    )
+    turnOnScreen()
+
   if LcdOn notin LcdControl[]:
     return
   while LineY[] <= 144:
@@ -148,18 +179,74 @@ proc turnOffScreen*(): void =
 
 template waitVram*() =
   ## Waits for the next rSTAT interrupt.
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/vram
+
+    # Writes a single byte to the tileset.
+    waitVram()
+    Tiles0[0] = 11'u8
+
   while Busy in LcdStat[]:
     discard
 
 template tiles*(i: Natural): int =
   ## Length of 2bpp tiles in bytes.
-  ##
-  ## ```nim
-  ## 6.tiles() == 0x60
-  ## ```
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/vram
+
+    discard 0x60.tiles # 0x600
   i * TileBytes
 
-when false:
+when true:
+  template `[]=`*(base: ptr VramTilemap, which: int, val: byte) =
+    ## Convenience for setting a raw value in the background map.
+    ## Be wary of using it with `offset`_.
+    runnableExamples "--compileOnly -r:off":
+      import jibby/utils/vram
+
+      BgMap0[0] = 0x7f'u8
+
+      # Be wary of going out of bounds here, since the bounds are
+      # still the same
+      BgMap0.offset(1, 4)[0] = 0x50'u8
+    cast[ptr array[BgMapWidth * BgMapHeight, byte]](base)[which] = val
+
+  template `[]=`*(base: ptr VramTileset, which: int, val: byte) =
+    ## Convenience for setting a raw value in the tileset.
+    ## Be wary of using it with `offset`_.
+    runnableExamples "--compileOnly -r:off":
+      import jibby/utils/vram
+
+      Tiles1[0] = 0x7f'u8
+
+      # Be wary of going out of bounds here, since the bounds are
+      # still the same
+      Tiles1.offset('J'.ord)[0] = 0x50'u8
+    cast[ptr array[TilesAmount * TileBytes, byte]](base)[which] = val
+
+  template offset*(
+      base: ptr VramTilemap, x: uint, y: uint
+  ): ptr VramTilemap =
+    ## Returns the memory location of some offset into the VRAM tile
+    ## map address specified in `base`. All positions are relative to
+    ## the top left.
+    runnableExamples "--compileOnly -r:off":
+      import jibby/utils/vram
+
+      discard BgMap0.offset(1, 1) # 0x9821
+    cast[ptr VramTilemap](cast[uint16](base) + (y * 0x20) + x)
+
+  template offset*(base: ptr VramTileset, tile: uint): ptr VramTileset =
+    ## Returns the memory location of some offset into the VRAM tile
+    ## set address specified in `base`. The argument specifies how
+    ## many tiles to offset it with.
+    runnableExamples "--compileOnly -r:off":
+      import jibby/utils/vram
+
+      discard Tiles1.offset(1) # 0x8810, tile #1 of tileset 0x8800
+    cast[ptr VramTileset](cast[uint16](base) + (tile * 0x10))
+
+else: # :(
   # {.borrow.} doesn't work; see nim-lang/Nim#3564
   template `[]`(a: VramTilemap, i: Ordinal): byte =
     cast[array[0x400, byte]](a)[i]
@@ -177,42 +264,18 @@ when false:
   template offset*(base: ptr VramTileset, tile: uint): ptr VramTileset =
     base[][tile * TileBytes].addr
 
-else: ## :(
-  template offset*(
-      base: ptr VramTilemap, x: uint, y: uint
-  ): ptr VramTilemap =
-    ## Returns the memory location of some offset into the VRAM tile
-    ## map address specified in `base`. All positions are relative to
-    ## the top left.
-    ##
-    ## ```nim
-    ## BgMap0.offset(1, 1) # 0x9821
-    ## ```
-    cast[ptr VramTilemap](cast[uint16](base) + (y * 0x20) + x)
-
-  template offset*(base: ptr VramTileset, tile: uint): ptr VramTileset =
-    ## Returns the memory location of some offset into the VRAM tile
-    ## set address specified in `base`. The argument specifies how
-    ## many tiles to offset it with.
-    ##
-    ## ```nim
-    ## Tiles1.offset(1) # 0x8810, tile #1 of tileset 0x8800
-    ## ```
-    cast[ptr VramTileset](cast[uint16](base) + (tile * 0x10))
-
 proc copyMem*(toAddr: VramPointer, fromAddr: pointer, size: Natural) =
   ## Copy some data to VRAM even when the screen is still on.
-  ##
-  ## ```nim
-  ## let message = "Hello"
-  ##
-  ## BgMap0.offset(0, 0).copyFrom(message[0].addr, message.len)
-  ## ```
   ## 
   ## .. tip::
   ##   
   ##   For displaying text to the screen, you should use the
   ##   `print`_ function.
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/vram
+
+    let message = "Hello"
+    BgMap0.offset(0, 0).copyMem(message[0].addr, message.len)
   var
     val {.noinit.}: byte
     src = cast[uint16](fromAddr)
@@ -239,14 +302,15 @@ proc copyMem*(toAddr: VramPointer, fromAddr: pointer, size: Natural) =
       dec i
 
 proc copy1bppFrom*(toAddr: VramPointer, fromAddr: pointer, size: Natural) =
-  ## A special version for copying 2-color (1bpp) tile data.
-  ## 
-  ## ```nim
-  ## import ./codegen
-  ## var monochromeFont* {.importc, asmDefined, noinit.}: uint8
-  ## 
-  ## Tiles0.offset(0).copy1bppFrom(monochromeFont.addr, 0x10.tiles)
-  ## ```
+  ## A special version of VRAM `copyMem`_ for copying 2-color (1bpp) tile data.
+  ## The `size` parameter should be what the size *would have* been if
+  ## `copyMem`_ were called instead.
+  runnableExamples "--compileOnly -r:off":
+    from jibby/utils/codegen import asmDefined
+    import jibby/utils/vram
+
+    var monochromeFont* {.importc, asmDefined, noinit.}: uint8
+    Tiles0.offset(0).copy1bppFrom(monochromeFont.addr, 0x10.tiles)
   var
     val {.noinit.}: byte
     src = cast[uint16](fromAddr)
@@ -271,11 +335,11 @@ template copyDoubleFrom*(
 
 proc setMem*(toAddr: VramPointer, value: byte, size: Natural) =
   ## Fill VRAM locations even when the screen is still on.
-  ## 
-  ## ```nim
-  ## # clear the entire screen
-  ## BgMap0.setMem(0, sizeof(BgMap0))
-  ## ```
+  runnableExamples "--compileOnly -r:off":
+    import jibby/utils/vram
+
+    # clear the entire screen
+    BgMap0.setMem(0, sizeof(BgMap0))
   var
     destInt = cast[uint16](toAddr)
     dest {.noinit.}: ptr byte

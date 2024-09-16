@@ -16,12 +16,23 @@ task docs, "Create documentation":
     docDir = "docs"
     docList = @["test", "getting-started"]
     outDir = "htmldocs"
+
+  # CC=echo effectively disables compilation of C code that wasn't
+  # even meant to be compiled with anything other than SDCC. I really
+  # just wanted the equivalent of `nim check` on it, that's all :(
+
   selfExec(
     [
       "doc",
       "--outdir:" & $outDir,
       "--project",
       "--index:only",
+      "--cc:env",
+      "--putenv:CC=echo",
+      "--threads:off",
+      "--path:" & absolutePath(thisDir()),
+      "-d:danger",
+      "--panics:on",
       libFile,
     ].join(" ")
   )
@@ -35,6 +46,12 @@ task docs, "Create documentation":
         "--outdir:" & $outDir,
         "--project",
         "--index:on",
+        "--cc:env",
+        "--putenv:CC=echo",
+        "--threads:off",
+        "--path:" & absolutePath(thisDir()),
+        "-d:danger",
+        "--panics:on",
         doc.path,
       ].join(" ")
     )
@@ -44,6 +61,12 @@ task docs, "Create documentation":
       "--outdir:" & $outDir,
       "--project",
       "--index:on",
+      "--cc:env",
+      "--putenv:CC=echo",
+      "--threads:off",
+      "--path:" & absolutePath(thisDir()),
+      "-d:danger",
+      "--panics:on",
       libFile,
     ].join(" ")
   )

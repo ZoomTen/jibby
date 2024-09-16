@@ -195,6 +195,15 @@ div.copyToClipBoard button.copyToClipBoardBtn:before {
     content: "Copy";
 }
 
+strong.examples_text {
+/* hide the "example" command line */
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    hyphens: none;
+    width: 8.25ch;
+}
+
 /* Syntax highlighting */
 
 span.DecNumber {
