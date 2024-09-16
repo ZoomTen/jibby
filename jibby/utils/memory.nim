@@ -49,8 +49,11 @@ template setMem*(start: pointer, value: byte, length: Natural) =
   runnableExamples "--compileOnly -r:off":
     import jibby/utils/memory
 
+    # fill WRAM0 with 0xFF
+    cast[pointer](0xc000).setMem(0xff, 0xd000 - 0xc000)
+
     # clear WRAM0
-    cast[pointer](0xc000).setMem(0, 0xd000 - 0xc000)
+    cast[pointer](0xc000).zeroMem(0xd000 - 0xc000)
   setMemImpl(start, value, length)
 
 when defined(nimdoc):
