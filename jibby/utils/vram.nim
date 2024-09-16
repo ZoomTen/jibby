@@ -1,4 +1,6 @@
 ## VRAM manipulation functions.
+## 
+## .. importdoc:: print.nim
 
 import ./interrupts
 import ./codegen
@@ -206,6 +208,11 @@ proc copyMem*(toAddr: VramPointer, fromAddr: pointer, size: Natural) =
   ##
   ## BgMap0.offset(0, 0).copyFrom(message[0].addr, message.len)
   ## ```
+  ## 
+  ## .. tip::
+  ##   
+  ##   For displaying text to the screen, you should use the
+  ##   `print`_ function.
   var
     val {.noinit.}: byte
     src = cast[uint16](fromAddr)
