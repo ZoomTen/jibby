@@ -139,7 +139,15 @@ nav#main-nav {
     font-size: .9em;
     line-height: 1.3em;
     overflow: hidden;
+}
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    line-height: 1.2em;
 }
 
 nav#main-nav ul {
@@ -173,7 +181,27 @@ article#contents {
     width: 0;
 }
 
-nav#main-nav > ul > li, article#contents li {
+
+@media screen and (max-width: 50em) {
+    div.is-split {
+        flex-direction: column;
+    }
+
+    nav#main-nav {
+        width: 100%;
+    }
+
+    article#contents {
+        width: 100%;
+    }
+
+    input#searchInput {
+        width: 100%;
+    }
+}
+
+nav#main-nav>ul>li,
+article#contents li {
     margin: .5em 0;
 }
 
@@ -196,7 +224,7 @@ div.copyToClipBoard button.copyToClipBoardBtn:before {
 }
 
 strong.examples_text {
-/* hide the "example" command line */
+    /* hide the "example" command line */
     display: inline-block;
     overflow: hidden;
     white-space: nowrap;
