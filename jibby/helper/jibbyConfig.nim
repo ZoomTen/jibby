@@ -11,7 +11,7 @@
 ## 
 ## Example:
 ## 
-## ```sh
+## ```cmd
 ## -d:gbAllocType=FreeList
 ## -d:gbRomTitle='HELLO WORLD'
 ## ```

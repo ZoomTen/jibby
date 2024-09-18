@@ -49,7 +49,7 @@
 ## 
 ## When Nim wants to make an object file, it will basically do:
 ## 
-## ```sh
+## ```cmd
 ## cc \
 ##   -O3 \
 ##   -fno-ident \
@@ -63,7 +63,7 @@
 ## would be to create a script or a separate program to essentially turn
 ## that mess into this different mess:
 ## 
-## ```sh
+## ```cmd
 ## ${gbdk_root}/bin/sdcc \
 ##   -S \
 ##   -I ${gbdk_root}/include \

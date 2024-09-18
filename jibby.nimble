@@ -36,6 +36,43 @@ task docs, "Create documentation":
       libFile,
     ].join(" ")
   )
+
+  for doc in walkDir(docDir):
+    let (dir, name, ext) = doc.path.splitFile()
+    if not (name.endsWith(".rst") and ext.toLowerAscii() == ".pre"):
+      continue
+    # preprocess files
+    var preprosLines: seq[string] = @[]
+    for line in staticRead(doc.path).splitLines():
+      let strpLine = line.strip()
+      if strpLine.startsWith("### INJECT-SNIPPET:"):
+        let (fileAsk, sectionAsk) = (
+          let
+            a = strpLine.split("### INJECT-SNIPPET:", 2)
+            b = a[1].split(':', 2)
+          (b[0].strip(), b[1].strip())
+        )
+        var shouldPrint = false
+        for lineExt in staticRead(fileAsk).splitLines():
+          let strpLineExt = lineExt.strip()
+          if strpLineExt.startsWith("### BEGIN-SNIPPET:"):
+            let section =
+              strpLineExt.split("### BEGIN-SNIPPET:", 2)[1].strip()
+            if section == sectionAsk:
+              shouldPrint = true
+            continue
+          elif strpLineExt.startsWith("### END-SNIPPET:"):
+            let section =
+              strpLineExt.split("### END-SNIPPET:", 2)[1].strip()
+            if section == sectionAsk:
+              shouldPrint = false
+            continue
+          if shouldPrint:
+            preprosLines.add "  " & lineExt
+      else:
+        preprosLines.add line
+    writeFile(docDir / name, preprosLines.join("\n"))
+
   for doc in walkDir(docDir):
     let (dir, name, ext) = doc.path.splitFile()
     if ext.toLowerAscii() != ".rst":

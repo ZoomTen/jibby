@@ -6,7 +6,7 @@ Jibby
 
 Yep. A Game Boy framework for Nim.
 
-Tutorial (of course it's not here yet…)
+Tutorial (of course it's not complete yet…)
 ==================================================
 
 1. `Getting started <getting-started.html>`_

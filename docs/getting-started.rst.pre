@@ -53,61 +53,25 @@ However, we are not going to be invoking the Nim compiler in the usual way. Inst
 
 .. code-block:: nim
   
-  when defined(nimsuggest):
-    import system/nimscript
-  
-  from std/os import `/`, absolutePath
-  from std/strutils import join
-  const
-    srcPath = "src"
-    romName = "blank"
-  
-  import jibby/helper/scriptConfig
-  if projectPath().absolutePath() == thisDir() / srcPath / romName:
-    precompileTools()
-    setupToolchain()
-    patchCompiler()
-    switch "listCmd"
-  
-  task build, "Build the ROM":
-    selfExec(
-      (
-        @["compile"] & makeArgs() & @["-o:" & romName & ".gb"] &
-        @[srcPath / romName]
-      ).join(" ")
-    )
-  
-  task clean, "Clean build artifacts":
-    for i in [".gb", ".ihx", ".map", ".noi", ".sym"]:
-      rmFile(romName & i)
-    rmDir(".tools")
-  
+  ### INJECT-SNIPPET: examples/Blank/config.nims:WholeFile
 
 Aight, let's break this down.
 
 .. code-block:: nim
   
-  when defined(nimsuggest):
-    import system/nimscript
+  ### INJECT-SNIPPET: examples/Blank/config.nims:NimSuggest
 
 So this bit is for the IDEs to not freak out when given this file. When this file is executed by the Nim compiler, it will automatically import this. Hopefully this issue will be fixed some time.
 
 .. code-block:: nim
   
-  const
-    srcPath = "src"
-    romName = "blank"
+  ### INJECT-SNIPPET: examples/Blank/config.nims:Config
 
-Here we define two constants: our source folder relative to this ``Blank`` folder, and the name of the source file (and corresponding ROM) within that folder. So, the source file will be ``src/blank.nim``, and the ROM will be output as ``blank.gb``.
+Here we define two constants: our source folder relative to this ``Blank`` folder, and the name of the source file (and corresponding ROM) within that folder.
 
 .. code-block:: nim
   
-  import jibby/helper/scriptConfig
-  if projectPath().absolutePath() == thisDir() / srcPath / romName:
-    precompileTools()
-    setupToolchain()
-    patchCompiler()
-    switch "listCmd"
+  ### INJECT-SNIPPET: examples/Blank/config.nims:RomSpecificConfig
 
 Here we set the additional stuff to do only when the compiler is given the file ``src/blank.nim``. We do this to ensure that when the compiler processes files that get imported from that main file, we don't do these again.
 
@@ -118,22 +82,13 @@ Here we set the additional stuff to do only when the compiler is given the file 
 
 .. code-block::nim
   
-  task build, "Build the ROM":
-    selfExec(
-      (
-        @["compile"] & makeArgs() & @["-o:" & romName & ".gb"] &
-        @[srcPath / romName]
-      ).join(" ")
-    )
+  ### INJECT-SNIPPET: examples/Blank/config.nims:BuildTask
 
-Here we define a ``build`` command. This is really just a quick shortcut to invoke ``nim compile -o:blank.gb src/blank.nim``. ``makeArgs()`` here attempts to pass whatever relevant defines you have set to the compiler process spawned here, in order for the tools to process them. See `makeArgs`_ for more details.
+Here we define a ``build`` command. This is really just a quick shortcut to invoke ``nim compile -o:blank.gb src/blank.nim``. Of course, ``blank.gb`` and ``src/blank.nim`` originating from the ``romName`` and ``srcPath`` variables we defined earlier. ``makeArgs()`` here attempts to pass whatever relevant defines you have set to the compiler process spawned here, in order for the tools to process them. See `makeArgs`_ for more details.
 
 .. code-block::nim
   
-  task clean, "Clean build artifacts":
-    for i in [".gb", ".ihx", ".map", ".noi", ".sym"]:
-      rmFile(romName & i)
-    rmDir(".tools")
+  ### INJECT-SNIPPET: examples/Blank/config.nims:CleanTask
 
 The ``clean`` command here does pretty much what it says on the tin.
 
@@ -144,7 +99,7 @@ You can add this to the **nim.cfg** file, so you don't need to specify ``GBDK_RO
 
 .. code-block:: nim
   
-  --putEnv:GBDK_ROOT:"/root/gbdk"
+  ### INJECT-SNIPPET: examples/Blank/nim.cfg:AddGbdk
 
 Obviously, you need to point this to the absolute path where you extracted SDCC or GBDK to.
 
@@ -159,18 +114,13 @@ Create a folder called **src**, and then inside that folder create **blank.nim**
 
 .. code-block:: nim
   
-  import jibby/runtime/init
-  import jibby/runtime/vblank
+  ### INJECT-SNIPPET: examples/Blank/src/blank.nim:WholeFile
 
 Finally, in the same folder, create **panicoverride.nim**:
 
 .. code-block:: nim
   
-  proc panic(s: string) =
-    discard
-  
-  proc rawoutput(s: string) =
-    discard
+  ### INJECT-SNIPPET: examples/Blank/src/panicoverride.nim:WholeFile
 
 The reason why this extra file is needed is because ``setupToolchain()`` earlier set the compiler's OS target to ``standalone``. As a result, the compiler wants to include a specific file called ``panicoverride.nim`` located near the file it's compiling, to provide those two procs that it needs for this target.
 
