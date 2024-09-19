@@ -1,7 +1,10 @@
+## .. warning::
+## 
+##   You should not import this file manually, as this will patch
+##   a Nim system file.
 ##
-## This file patches `memory.nim` from the system module.
-## Dunno why it's called "stdlib" when used with patchFile...
-##
+
+# Dunno why it's called "stdlib" when used with patchFile...
 
 proc nimZeroMem*(p: pointer, size: Natural) {.compilerproc, inline.} =
   var
@@ -28,20 +31,25 @@ template copyMemImpl(dest, source: pointer, size: Natural) {.dirty.} =
     inc i
     inc j
 
-proc nimCopyMem*(dest, source: pointer, size: Natural) {.compilerproc.} =
-  copyMemImpl(dest, source, size)
 
-proc c_memcpy(
-    dest, src: pointer, size: uint
-): pointer {.exportc: "__memcpy".} =
-  ## This needs to be exposed since SDCC will automatically call this when
-  ## assigning a struct. Whereas nimCopyMem doesn't need to return anything,
-  ## memcpy does, and its return value will be used for the assignment.
-  ##
-  ## "Why are there two memcpy functions with nearly identical contents?"
-  ## Well, there's your answer.
-  copyMemImpl(dest, src, size)
-  dest
+when not defined(gbUseAsmProcs):
+  proc nimCopyMem*(dest, source: pointer, size: Natural) {.compilerproc.} =
+    copyMemImpl(dest, source, size)
+
+  proc c_memcpy(
+      dest, src: pointer, size: uint
+  ): pointer {.exportc: "__memcpy".} =
+    ## This needs to be exposed since SDCC will automatically call this when
+    ## assigning a struct. Whereas nimCopyMem doesn't need to return anything,
+    ## memcpy does, and its return value will be used for the assignment.
+    ##
+    ## "Why are there two memcpy functions with nearly identical contents?"
+    ## Well, there's your answer.
+    copyMemImpl(dest, src, size)
+    dest
+else:
+  {.compile:"asm/memcpy.asm".}
+  proc nimCopyMem*(dest, source: pointer, size: Natural) {.importc.} = discard
 
 # untested
 proc nimCmpMem*(a, b: pointer, size: Natural): cint {.inline.} =

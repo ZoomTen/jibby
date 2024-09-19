@@ -2,6 +2,8 @@
 ## Jibby configuration
 ## ===================
 ## 
+## .. importdoc:: ../utils/nimMemory.nim
+## 
 ## Inspired by `Chronicles <https://github.com/status-im/nim-chronicles>`_,
 ## Jibby allows you to configure various ROM setttings at compile-time
 ## through command line parameters.
@@ -45,7 +47,7 @@ const
   truthySwitches = ["yes", "1", "on", "true"]
   falsySwitches = ["no", "0", "off", "false", "none"]
 
-proc enumValues(E: typedesc[enum]): string =
+proc enumValues(E: typedesc[enum]): string {.compileTime.} =
   result = mapIt(E, $it).join(", ")
 
 proc handleEnumOption(
@@ -122,6 +124,12 @@ const
     ## higher value = better code gen but longer to compile.
     ## 
     ## .. note:: requires tool rebuild.
+  useAsmProcs*: bool = defined(gbUseAsmProcs)
+    ## whether or not some procs should use the assembly version.
+    ## 
+    ## currently affects:
+    ## 
+    ## 1. `nimCopyMem`_ and the ``memcpy`` function.
 
 when isMainModule:
   static:
@@ -133,3 +141,4 @@ when isMainModule:
     echo codeStart
     echo useGbdk
     echo compilerMaxAlloc
+    echo useAsmProcs

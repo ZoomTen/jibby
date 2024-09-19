@@ -43,8 +43,8 @@ when defined(nimdoc):
   import ./tools/[compile, link]
   import
     ./utils/[
-      audio, codegen, incdec, interrupts, itoa, joypad, memory, print,
-      sprites, vram,
+      audio, codegen, incdec, interrupts, itoa, joypad, memory, nimMemory,
+      print, sprites, vram,
     ]
 else:
   {.error: "This is for docgen purposes only".}
