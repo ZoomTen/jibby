@@ -98,7 +98,7 @@ So this bit is for the IDEs to not freak out when given this file. When this fil
     srcPath = "src"
     romName = "blank"
 
-Here we define two constants: our source folder relative to this ``Blank`` folder, and the name of the source file (and corresponding ROM) within that folder. So, the source file will be ``src/blank.nim``, and the ROM will be output as ``blank.gb``.
+Here we define two constants: our source folder relative to this ``Blank`` folder, and the name of the source file (and corresponding ROM) within that folder.
 
 .. code-block:: nim
   
@@ -126,7 +126,7 @@ Here we set the additional stuff to do only when the compiler is given the file 
       ).join(" ")
     )
 
-Here we define a ``build`` command. This is really just a quick shortcut to invoke ``nim compile -o:blank.gb src/blank.nim``. ``makeArgs()`` here attempts to pass whatever relevant defines you have set to the compiler process spawned here, in order for the tools to process them. See `makeArgs`_ for more details.
+Here we define a ``build`` command. This is really just a quick shortcut to invoke ``nim compile -o:blank.gb src/blank.nim``. Of course, ``blank.gb`` and ``src/blank.nim`` originating from the ``romName`` and ``srcPath`` variables we defined earlier. ``makeArgs()`` here attempts to pass whatever relevant defines you have set to the compiler process spawned here, in order for the tools to process them. See `makeArgs`_ for more details.
 
 .. code-block::nim
   
