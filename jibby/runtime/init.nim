@@ -21,7 +21,7 @@
 # Some minimal static RAM defines
 {.compile: "asm/staticRam.asm".}
 
-template initRuntimeVars*(): untyped =
+template initNimRuntimeVars*(): untyped =
   ## This should be called on initialization.
   ## 
   ## The Game Boy RAM is initialized to random values on bootup.
