@@ -3,6 +3,7 @@
 ## ===================
 ## 
 ## .. importdoc:: ../utils/nimMemory.nim
+## .. importdoc:: ../runtime/init.nim
 ## 
 ## Inspired by `Chronicles <https://github.com/status-im/nim-chronicles>`_,
 ## Jibby allows you to configure various ROM setttings at compile-time
@@ -130,6 +131,7 @@ const
     ## currently affects:
     ## 
     ## 1. `nimCopyMem`_ and the ``memcpy`` function.
+    ## 2. `initNimRuntimeVars`_.
 
 when isMainModule:
   static:

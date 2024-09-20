@@ -35,13 +35,43 @@ template initNimRuntimeVars*(): untyped =
   ## but I'd probably need to make a separate version since they do not
   ## support patchFile and such other "frivolous" things... yet?
 
-  # Clear hooks
-  globalRaiseHook = nil
-  localRaiseHook = nil
-  outOfMemHook = nil
-  unhandledExceptionHook = nil
+  when defined(gbUseAsmProcs):
+    globalRaiseHook = nil
+    # we can't just say "globalRaiseHook" because
+    # it's actually "globalRaiseHook_systemSomething".
+    #
+    # I'm invoking Hyrum's Law and assume that SDCC
+    # will set hl to globalRaiseHook from that statement
+    # above, and just run with it.
+    
+    # localRaiseHook
+    asm """
+      inc hl
+      ld (hl+), a
+      ld (hl+), a
+    """
+    # outOfMemHook
+    asm """
+      ld (hl+), a
+      ld (hl+), a
+    """
+    # unhandledExceptionHook
+    asm """
+      ld (hl+), a
+      ld (hl+), a
+    """
+    # nimInErrorMode
+    asm """
+      ld (hl), a
+    """
+  else:
+    # Clear hooks
+    globalRaiseHook = nil
+    localRaiseHook = nil
+    outOfMemHook = nil
+    unhandledExceptionHook = nil
 
-  # Clear nimIsInErrorMode. This assumes that particular variable
-  # is located directly after unhandledExceptionHook. Done this way
-  # because nimIsInErrorMode can't be accessed from here.
-  cast[ptr byte](cast[uint16](unhandledExceptionHook.addr) + 2)[] = 0
+    # Clear nimIsInErrorMode. This assumes that particular variable
+    # is located directly after unhandledExceptionHook. Done this way
+    # because nimIsInErrorMode can't be accessed from here.
+    cast[ptr byte](cast[uint16](unhandledExceptionHook.addr) + 2)[] = 0
