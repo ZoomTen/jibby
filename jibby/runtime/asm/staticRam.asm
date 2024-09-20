@@ -6,7 +6,7 @@
 	.area _DATA
 
 _heap::
-wHeap:: .ds 0x100 - 1
+wHeap:: .ds HEAPSIZE - 1
 _heap_end::
 wHeapEnd:: .ds 1
 

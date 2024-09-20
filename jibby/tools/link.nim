@@ -31,6 +31,7 @@ static:
   {.hint: "ROM code start    : " & codeStart.toHex(4).}
   {.hint: "Sprites start     : " & virtualSpritesStart.toHex(4).}
   {.hint: "GBDK enabled      : " & $useGbdk.}
+  {.hint: "Heap size         : " & heapSize.toHex(4).}
 
 type
   RecordKind = enum
@@ -156,6 +157,7 @@ when isMainModule:
         "-u", # update all the listing files to reflect actual locations
         # define globals
         "-g STACK=0x" & stackStart.toHex(4),
+        "-g HEAPSIZE=0x" & heapSize.toHex(4),
         # define base addrs
         "-b _DATA=0x" & dataStart.toHex(4),
         "-b _CODE=0x" & codeStart.toHex(4),

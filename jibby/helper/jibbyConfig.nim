@@ -40,6 +40,7 @@ const
   gbStackStart {.strdefine.} = "0xe000"
   gbDataStart {.strdefine.} = "0xc0a0"
   gbCodeStart {.strdefine.} = "0x150"
+  gbHeapSize {.strdefine.} = "0x100"
   gbUseGbdk {.strdefine.} = "off"
   gbCompilerMaxAlloc {.intdefine.} = 50_000
 
@@ -132,6 +133,11 @@ const
     ## 
     ## 1. `nimCopyMem`_ and the ``memcpy`` function.
     ## 2. `initNimRuntimeVars`_.
+  heapSize*: int = handleHexOption(gbHeapSize)
+    ## the size of the dynamic heap available to the malloc
+    ## function.
+    ##
+    ## .. note:: requires tool rebuild.
 
 when isMainModule:
   static:
