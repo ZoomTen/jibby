@@ -27,8 +27,8 @@ wSpriteRAM:: .ds 4 * 40
 	.area _HRAM
 ; The OAM DMA program for sprite updating will be
 ; copied here
-_spriteDmaProgram::
-hSpriteDMAProgram:: .ds 0xA ; sizeof(_OAMDMA_CODE)
+_spriteDmaProgramContinued::
+hSpriteDMAProgram:: .ds 0x5 ; sizeof(OAMUpdateApply)
 
 ; The value of `a` upon startup.
 ; Functions can query this to determine GB/GBC mode.

@@ -29,7 +29,6 @@ import ../utils/incdec
 # codegen macros don't carry over.
 var vblankAcked {.importc, hramByte, noinit.}: bool
 
-# in HRAM
 proc spriteDmaProgram(): void {.importc.} =
   discard
 

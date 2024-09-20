@@ -23,9 +23,9 @@ dmg$:
 	ld sp, #STACK
 
 ; copy sprite committing code to HRAM
-	ld de, #OAMUpdate
+	ld de, #OAMUpdateApply
 	ld hl, #hSpriteDMAProgram
-	ld c, #l__OAMDMA_CODE
+	ld c, #5 ; sizeof(OAMUpdateApply)
 	rst 0x08 ; MemcpySmall
 
 ; clear sprite RAM
