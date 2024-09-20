@@ -18,12 +18,22 @@ const
 
 template turnOffInterrupts*() =
   ## Injects the `di` instruction.
+  ## 
+  ## .. warning::
+  ## 
+  ##   Since this is inline assembly, you must use this inside
+  ##   of a proc.
   asm """
     di
   """
 
 template turnOnInterrupts*() =
   ## Injects the `ei` instruction.
+  ## 
+  ## .. warning::
+  ## 
+  ##   Since this is inline assembly, you must use this inside
+  ##   of a proc.
   asm """
     ei
   """
