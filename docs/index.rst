@@ -16,3 +16,4 @@ Additional references
 =====================
 
 * `Notes on Game Boy programming in Nim <notes.html>`_
+* `Anatomy of the Jibby runtime <runtime.html>`_

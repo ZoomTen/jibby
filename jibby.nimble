@@ -67,6 +67,18 @@ task docs, "Create documentation":
             if section == sectionAsk:
               shouldPrint = false
             continue
+          elif strpLineExt.startsWith(";;; BEGIN-SNIPPET:"):
+            let section =
+              strpLineExt.split(";;; BEGIN-SNIPPET:", 2)[1].strip()
+            if section == sectionAsk:
+              shouldPrint = true
+            continue
+          elif strpLineExt.startsWith(";;; END-SNIPPET:"):
+            let section =
+              strpLineExt.split(";;; END-SNIPPET:", 2)[1].strip()
+            if section == sectionAsk:
+              shouldPrint = false
+            continue
           if shouldPrint:
             preprosLines.add "  " & lineExt
       else:
